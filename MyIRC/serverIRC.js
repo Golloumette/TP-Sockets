@@ -4,12 +4,13 @@ const { buffer } = require("stream/consumers");
 // Port de la socket pour le serveur
 const PORT = 6667;
 const tableauPseudo = new Map();
-
+const listPseudo = "/list";
 // Création du serveur, la socket ouverte par le client est en paramètre.
 const server = net.createServer((socket) => {
   console.log("--- Client connecté.");
   let pseudo = null;
   socket.write ("Quel est ton pseudo ?")
+  // creation buffer perso
   let buf = "";
   socket.on("data", (data) => {
     buf += data;
@@ -22,12 +23,20 @@ const server = net.createServer((socket) => {
       speakAll(tableauPseudo,`Nous accueillons ${buf}`)
       buf = "";
       } else {
-        speakAll(tableauPseudo,`[${pseudo}]: ${buf}`)
+        if(line == listPseudo){
+          
+          socket.write(Array.from(tableauPseudo.keys()).join(', '));
+          socket.write(("\n\r"));
+    } else {
+       speakAll(tableauPseudo,`[${pseudo}]: ${buf}`)
       buf = "";
+    }
+       
       }
-      
+    
       
     }
+     
      
   });
     socket.on("end", () => {
@@ -74,11 +83,15 @@ const server = net.createServer((socket) => {
 server.listen(PORT, () => {
   console.log(`Serveur IRC en écoute sur le port ${PORT}`);
 });
-
+// liste des fonctions 
 function speakAll(tableauPseudo,message){
   const listSocket = tableauPseudo.values();
   for(const socket of listSocket){
     socket.write(message)
   }
-
 }
+function commandAdmin (tableauPseudo){
+    socket.write(tableauPseudo.key())
+  
+}
+
