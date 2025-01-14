@@ -5,6 +5,7 @@ const { buffer } = require("stream/consumers");
 const PORT = 6667;
 const tableauPseudo = new Map();
 const listPseudo = "/list";
+const whisper = "/whisper";
 // Création du serveur, la socket ouverte par le client est en paramètre.
 const server = net.createServer((socket) => {
   console.log("--- Client connecté.");
@@ -24,17 +25,23 @@ const server = net.createServer((socket) => {
       buf = "";
       } else {
         if(line == listPseudo){
-          
-          socket.write(Array.from(tableauPseudo.keys()).join(', '));
-          socket.write(("\n\r"));
-    } else {
-       speakAll(tableauPseudo,`[${pseudo}]: ${buf}`)
+             socket.write(Array.from(tableauPseudo.keys()).join(', '));
+             buf = "";
+             socket.write(("\n\r"));
+        } else if (line.startsWith(whisper)){
+            let arrayMessage = line.split(" ");
+            socket = tableauPseudo.get(arrayMessage[1]);
+            socket.write(`[${pseudo}]`+arrayMessage.slice(2).join(" "));
+            buf = "";
+            socket.write(("\n\r"));
+        } else {
+          speakAll(tableauPseudo,`[${pseudo}]: ${buf}`)
       buf = "";
-    }
+        }     
+
        
-      }
-    
-      
+    }
+          
     }
      
      
